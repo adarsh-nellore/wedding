@@ -1,0 +1,331 @@
+/* =========================================================================
+   K + A · CDMX 2027 — Slideshow stylesheet
+   See design-system.md. One color. One size. One weight. One font.
+   ========================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "latienne-pro", "Cormorant Garamond", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-size: var(--fs);
+  font-weight: 400;
+  line-height: var(--lh);
+  letter-spacing: var(--tracking);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+img { max-width: 100%; display: block; }
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  letter-spacing: inherit;
+}
+p { margin: 0; }
+em { font-style: italic; font-weight: 400; }
+
+::selection { background: var(--fg); color: var(--bg); }
+
+/* -----------------------------------------------------------------------
+   Stage / scenes
+----------------------------------------------------------------------- */
+
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms var(--ease);
+  display: grid;
+  align-items: center;
+  padding: clamp(28px, 6vw, 96px);
+  overflow: hidden;
+}
+
+.scene.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scene-grid {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  gap: clamp(40px, 6vw, 96px);
+}
+
+.scene-grid--right-photo {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* -----------------------------------------------------------------------
+   Copy regions
+----------------------------------------------------------------------- */
+
+.copy { display: block; }
+
+.copy--left-mid {
+  align-self: center;
+  justify-self: start;
+  max-width: 720px;
+}
+
+.copy--left-top {
+  align-self: start;
+  justify-self: start;
+  max-width: 720px;
+  padding-top: 4vh;
+}
+
+.copy--center {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(28px, 4vh, 56px);
+}
+
+.copy--bottom-right {
+  position: absolute;
+  right: clamp(28px, 6vw, 96px);
+  bottom: clamp(40px, 8vh, 96px);
+  z-index: 2;
+  text-align: right;
+  max-width: 80%;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+
+/* -----------------------------------------------------------------------
+   Lines (typewriter targets)
+----------------------------------------------------------------------- */
+
+.line {
+  min-height: 1.35em;
+  position: relative;
+  display: inline-block;
+  white-space: pre-wrap;
+}
+
+.line--center { display: block; }
+
+/* Cursor — only on the line currently typing. */
+.line.is-typing::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-left: 6px;
+  vertical-align: -0.08em;
+  background: currentColor;
+  animation: blink 900ms steps(1) infinite;
+}
+
+@keyframes blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* -----------------------------------------------------------------------
+   Photos
+----------------------------------------------------------------------- */
+
+.photo {
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--photo-fade) var(--ease), transform var(--photo-fade) var(--ease);
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo.is-in { opacity: 1; transform: translate3d(0, 0, 0); }
+
+.photo--portrait {
+  aspect-ratio: 3 / 4;
+  max-width: 100%;
+  width: 100%;
+  max-height: 84vh;
+  justify-self: end;
+}
+
+.photo--wide {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.photo--bleed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  transform: translate3d(-40px, 0, 0);
+}
+
+.scene--amor .copy--bottom-right {
+  text-shadow: 0 2px 22px rgba(0,0,0,0.65);
+}
+
+/* -----------------------------------------------------------------------
+   Form (scene 6)
+----------------------------------------------------------------------- */
+
+.rsvp {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 0.6em;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 800ms var(--ease);
+}
+
+.field.is-in { opacity: 1; }
+
+.field span { opacity: 0.55; }
+
+.field input {
+  width: 100%;
+  padding: 0.2em 0;
+  background: transparent;
+  color: var(--fg);
+  border: 0;
+  border-bottom: 1px solid var(--fg);
+  border-radius: 0;
+  font: inherit;
+  font-size: var(--fs);
+  letter-spacing: var(--tracking);
+  outline: none;
+}
+
+.field input:focus { border-bottom-width: 2px; padding-bottom: calc(0.2em - 1px); }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6em;
+  margin-top: 0.6em;
+  opacity: 0;
+  transition: opacity 800ms var(--ease);
+}
+
+.actions.is-in { opacity: 1; }
+
+.actions button {
+  position: relative;
+  padding: 0;
+  text-align: left;
+}
+
+.actions button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--fg);
+  transform-origin: left;
+  transform: scaleX(1);
+  transition: transform 600ms var(--ease);
+}
+
+.actions button:hover::after,
+.actions button:focus-visible::after {
+  transform-origin: right;
+  transform: scaleX(0);
+}
+
+.actions button[disabled] { opacity: 0.4; cursor: default; }
+
+/* -----------------------------------------------------------------------
+   Scene-specific
+----------------------------------------------------------------------- */
+
+#s5 .photo--wide { max-height: 64vh; }
+
+/* -----------------------------------------------------------------------
+   Responsive
+----------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .scene-grid--right-photo {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .photo--portrait {
+    max-height: 50vh;
+    aspect-ratio: 4 / 5;
+    justify-self: center;
+  }
+
+  .copy--left-mid,
+  .copy--left-top {
+    align-self: center;
+    justify-self: center;
+    text-align: left;
+    width: 100%;
+  }
+
+  .copy--bottom-right {
+    left: clamp(24px, 6vw, 40px);
+    right: clamp(24px, 6vw, 40px);
+    text-align: left;
+    max-width: none;
+  }
+}
+
+@media (max-width: 560px) {
+  :root { --fs: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 200ms !important;
+  }
+  .line.is-typing::after { animation: none; }
+}

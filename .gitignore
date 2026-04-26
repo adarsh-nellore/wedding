@@ -1,0 +1,13 @@
+# Audio (copyrighted — keep local only)
+assets/*.m4a
+assets/*.mp3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo

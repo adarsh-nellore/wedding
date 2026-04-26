@@ -1,0 +1,20 @@
+/* =========================================================================
+   K + A · CDMX 2027 — Tokens
+   See design-system.md. One color. One size. One weight.
+   ========================================================================= */
+
+:root {
+  --bg: #0E0E0E;
+  --fg: #EFE7D2;
+
+  --fs: 30px;
+  --lh: 1.35;
+  --tracking: 0;
+
+  --gutter: clamp(24px, 6vw, 96px);
+  --max: 1100px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 1200ms;
+  --photo-fade: 1400ms;
+}
