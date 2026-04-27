@@ -42,6 +42,53 @@ em { font-style: italic; font-weight: 400; }
 ::selection { background: var(--fg); color: var(--bg); }
 
 /* -----------------------------------------------------------------------
+   Controls (prev / pause-play / next)
+----------------------------------------------------------------------- */
+
+.controls {
+  position: fixed;
+  right: clamp(16px, 2.4vw, 28px);
+  bottom: clamp(16px, 2.4vw, 28px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ctrl {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+  opacity: 0.32;
+  transition: opacity 320ms var(--ease);
+}
+
+.ctrl:hover,
+.ctrl:focus-visible { opacity: 0.9; outline: none; }
+
+.ctrl[disabled] {
+  opacity: 0.12;
+  cursor: default;
+  pointer-events: none;
+}
+
+.ctrl .icon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  transition: opacity 220ms var(--ease);
+}
+
+#control[data-state="playing"] .icon-play  { opacity: 0; }
+#control[data-state="playing"] .icon-pause { opacity: 1; }
+#control[data-state="paused"]  .icon-play  { opacity: 1; }
+#control[data-state="paused"]  .icon-pause { opacity: 0; }
+
+/* -----------------------------------------------------------------------
    Stage / scenes
 ----------------------------------------------------------------------- */
 
@@ -121,8 +168,10 @@ em { font-style: italic; font-weight: 400; }
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 0.55em;
+  gap: 0.4em;
 }
+
+.line-gap { height: 0.25em; }
 
 /* -----------------------------------------------------------------------
    Lines (typewriter targets)
@@ -137,8 +186,9 @@ em { font-style: italic; font-weight: 400; }
 
 .line--center { display: block; }
 
-/* Cursor — only on the line currently typing. */
-.line.is-typing::after {
+/* Cursor — only on the element currently typing. */
+.line.is-typing::after,
+.line-lead.is-typing::after {
   content: "";
   display: inline-block;
   width: 2px;
@@ -196,8 +246,46 @@ em { font-style: italic; font-weight: 400; }
   transform: translate3d(-40px, 0, 0);
 }
 
+/* Pull the visible crop window toward the top of the image so the upper
+   architecture (medallion, carved arch) stays in frame. */
+.photo--bleed img {
+  object-position: center 28%;
+}
+
+/* Full-width cropped band — leaves vertical breathing room above and below
+   for the bottom-right copy on scene 2. */
+.photo--full {
+  width: 100%;
+  height: 62vh;
+  align-self: center;
+  justify-self: stretch;
+}
+
+.photo--full img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
 .scene--amor .copy--bottom-right {
-  text-shadow: 0 2px 22px rgba(0,0,0,0.65);
+  z-index: 2;
+  text-shadow: 0 2px 22px rgba(0,0,0,0.7);
+}
+
+/* Scene 2 — "amor ♥" fade-in (replaces the typed "<3") */
+.amor-fade {
+  opacity: 0;
+  transition: opacity 2000ms var(--ease);
+  white-space: nowrap;
+}
+
+.amor-fade.is-in { opacity: 1; }
+
+.heart {
+  font-style: normal;
+  display: inline-block;
 }
 
 /* -----------------------------------------------------------------------
@@ -319,7 +407,7 @@ em { font-style: italic; font-weight: 400; }
 }
 
 @media (max-width: 560px) {
-  :root { --fs: 22px; }
+  :root { --fs: 26px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

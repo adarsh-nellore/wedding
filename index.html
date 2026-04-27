@@ -21,6 +21,28 @@
       <source src="assets/cerca-de-ti.mp3" type="audio/mpeg" />
     </audio>
 
+    <div class="controls" id="controls">
+      <button class="ctrl" id="prev" type="button" aria-label="Previous scene">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 5 L7 12 L15 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="ctrl" id="control" type="button" aria-label="Pause" data-state="playing">
+        <svg class="icon icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="7" y="5" width="3" height="14" rx="0.5" />
+          <rect x="14" y="5" width="3" height="14" rx="0.5" />
+        </svg>
+        <svg class="icon icon-play" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 5 L19 12 L7 19 Z" />
+        </svg>
+      </button>
+      <button class="ctrl" id="next" type="button" aria-label="Next scene">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5 L17 12 L9 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
     <main class="stage">
       <!-- 1 — Hero -->
       <section class="scene scene--hero" id="s1">
@@ -30,7 +52,7 @@
           </div>
           <figure class="photo photo--portrait" data-photo="hero">
             <img
-              src="assets/095F6499-72FA-4D0C-A7DA-15443980E794.jpg"
+              src="assets/2C00FF18-B7B0-4F0D-8970-70172557C854.jpg"
               alt=""
               loading="eager"
               decoding="async"
@@ -41,26 +63,36 @@
 
       <!-- 2 — Amor -->
       <section class="scene scene--amor" id="s2">
-        <figure class="photo photo--bleed" data-photo="amor">
+        <figure class="photo photo--full" data-photo="amor">
           <img
-            src="assets/BACC20B3-3A36-4547-9E79-38A7D35BBBCD.jpg"
+            src="assets/095F6499-72FA-4D0C-A7DA-15443980E794.jpg"
             alt=""
             loading="lazy"
             decoding="async"
           />
         </figure>
         <div class="copy copy--bottom-right">
-          <p class="line" data-line="amor"></p>
+          <p class="line" data-line="amor"><span class="line-lead"></span><span class="amor-fade"> <em>amor</em> <span class="heart">♥</span></span></p>
         </div>
       </section>
 
       <!-- 3 — Dates -->
       <section class="scene scene--dates" id="s3">
-        <div class="copy copy--left-mid stack">
-          <p class="line" data-line="d-date"></p>
-          <p class="line" data-line="d-fri"></p>
-          <p class="line" data-line="d-sat"></p>
-          <p class="line" data-line="d-sun"></p>
+        <div class="scene-grid scene-grid--right-photo">
+          <div class="copy copy--left-mid stack">
+            <p class="line" data-line="d-date"></p>
+            <p class="line" data-line="d-fri"></p>
+            <p class="line" data-line="d-sat"></p>
+            <p class="line" data-line="d-sun"></p>
+          </div>
+          <figure class="photo photo--portrait" data-photo="dates">
+            <img
+              src="assets/IMG_6207.jpeg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
         </div>
       </section>
 
@@ -69,34 +101,23 @@
         <div class="scene-grid scene-grid--right-photo">
           <div class="copy copy--left-mid stack">
             <p class="line" data-line="why-q"></p>
+            <div class="line-gap" aria-hidden="true"></div>
             <p class="line" data-line="why-1"></p>
             <p class="line" data-line="why-2"></p>
             <p class="line" data-line="why-3"></p>
+            <div class="line-gap" aria-hidden="true"></div>
             <p class="line" data-line="why-4"></p>
+            <div class="line-gap" aria-hidden="true"></div>
+            <p class="line" data-line="why-5"></p>
           </div>
           <figure class="photo photo--portrait" data-photo="why">
             <img
-              src="assets/2C00FF18-B7B0-4F0D-8970-70172557C854.jpg"
+              src="assets/BACC20B3-3A36-4547-9E79-38A7D35BBBCD.jpg"
               alt=""
               loading="lazy"
               decoding="async"
             />
           </figure>
-        </div>
-      </section>
-
-      <!-- 5 — Invite teaser -->
-      <section class="scene scene--invite" id="s5">
-        <div class="copy copy--center stack">
-          <figure class="photo photo--wide" data-photo="invite">
-            <img
-              src="assets/7BF617C4-EB50-422C-9FFA-4AE1C12B433F.jpg"
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          </figure>
-          <p class="line line--center" data-line="invite"></p>
         </div>
       </section>
 
@@ -142,12 +163,22 @@
 
       <!-- 7 — Thank you -->
       <section class="scene scene--thanks" id="s7">
-        <div class="copy copy--left-mid stack">
-          <p class="line" data-line="t-1"></p>
-          <p class="line" data-line="t-2"></p>
-          <p class="line" data-line="t-3"></p>
-          <p class="line" data-line="t-4"></p>
-          <p class="line" data-line="t-5"></p>
+        <div class="scene-grid scene-grid--right-photo">
+          <div class="copy copy--left-mid stack">
+            <p class="line" data-line="t-1"></p>
+            <p class="line" data-line="t-2"></p>
+            <p class="line" data-line="t-3"></p>
+            <p class="line" data-line="t-4"></p>
+            <p class="line" data-line="t-5"></p>
+          </div>
+          <figure class="photo photo--portrait" data-photo="thanks">
+            <img
+              src="assets/amor.jpg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
         </div>
       </section>
     </main>
