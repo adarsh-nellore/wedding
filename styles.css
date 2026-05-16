@@ -580,6 +580,12 @@ em { font-style: italic; font-weight: 400; }
 ----------------------------------------------------------------------- */
 
 @media (max-width: 900px) {
+  /* Allow page-level scrolling on mobile */
+  html, body {
+    overflow: auto;
+    height: auto;
+  }
+
   /* Center nav controls at bottom */
   .controls {
     left: 50%;
@@ -587,17 +593,19 @@ em { font-style: italic; font-weight: 400; }
     transform: translateX(-50%);
   }
 
-  /* Center audio toggle at top */
+  /* Move audio toggle to bottom-center, above the nav controls */
   .audio-toggle {
-    left: 50%;
+    top: auto;
     right: auto;
+    left: 50%;
+    bottom: calc(clamp(16px, 2.4vw, 28px) + 52px + 16px);
     transform: translateX(-50%);
   }
 
   /* Allow scenes to scroll so tall content isn't cropped */
   .scene {
     overflow-y: auto;
-    padding-bottom: 90px;
+    padding-bottom: 120px;
   }
 
   .scene-grid--right-photo,
