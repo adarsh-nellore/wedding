@@ -7,7 +7,7 @@
   --bg: #0E0E0E;
   --fg: #EFE7D2;
 
-  --fs: clamp(20px, 2.8vw, 38px);
+  --fs: clamp(16px, 2.2vw, 30px);
   --lh: 1.35;
   --tracking: 0;
 
