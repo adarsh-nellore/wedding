@@ -580,6 +580,26 @@ em { font-style: italic; font-weight: 400; }
 ----------------------------------------------------------------------- */
 
 @media (max-width: 900px) {
+  /* Center nav controls at bottom */
+  .controls {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  /* Center audio toggle at top */
+  .audio-toggle {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  /* Allow scenes to scroll so tall content isn't cropped */
+  .scene {
+    overflow-y: auto;
+    padding-bottom: 90px;
+  }
+
   .scene-grid--right-photo,
   .scene-grid--left-photo {
     grid-template-columns: 1fr;
@@ -856,5 +876,21 @@ body.is-cover .controls {
   color: var(--fg);
   opacity: 0.45;
   margin: 0;
+}
+
+.cover__pw-submit {
+  color: var(--fg);
+  opacity: 0.45;
+  font-size: 1.1em;
+  letter-spacing: 0;
+  padding: 0.3em 0.6em;
+  transition: opacity 200ms ease;
+  line-height: 1;
+}
+
+.cover__pw-submit:hover,
+.cover__pw-submit:focus-visible {
+  opacity: 0.9;
+  outline: none;
 }
 
