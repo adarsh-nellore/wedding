@@ -75,25 +75,66 @@
   const TYPE_OUT = REDUCED ? 0 : 22;
 
   // ---------------------------------------------------------------------
-  // Music — autoplay with graceful fallback to first user gesture.
+  // Music — starts silently via autoplay+muted; unmutes on first input
+  // or via the top-right toggle. Toggle reflects on/off state.
   // ---------------------------------------------------------------------
   const audio = $('#music');
-  let musicArmed = false;
+  const audioToggle = $('#audio-toggle');
+  let firstUnmuteDone = false;
 
-  function tryPlay() {
+  function setToggle(state) {
+    if (audioToggle) {
+      audioToggle.dataset.state = state;
+      audioToggle.setAttribute('aria-label', state === 'on' ? 'Mute audio' : 'Unmute audio');
+    }
+  }
+
+  function unmuteMusic() {
     if (!audio) return;
-    const p = audio.play();
-    if (p && typeof p.then === 'function') {
-      p.catch(() => {
-        if (musicArmed) return;
-        musicArmed = true;
-        const arm = () => {
-          audio.play().catch(() => {});
-          ['pointerdown','click','keydown','touchstart','pointermove','scroll','wheel']
-            .forEach(ev => window.removeEventListener(ev, arm, { passive: true }));
-        };
-        ['pointerdown','click','keydown','touchstart','pointermove','scroll','wheel']
-          .forEach(ev => window.addEventListener(ev, arm, { passive: true, once: true }));
+    audio.muted = false;
+    if (!paused) audio.play().catch(() => {});
+    if (!firstUnmuteDone) {
+      firstUnmuteDone = true;
+      fadeMusic(0.55, 1200);
+    } else {
+      audio.volume = 0.55;
+    }
+    setToggle('on');
+  }
+
+  function muteMusic() {
+    if (!audio) return;
+    audio.muted = true;
+    setToggle('off');
+  }
+
+  function startMusic() {
+    if (!audio) return;
+
+    if (audio.muted) {
+      // No user gesture has happened yet — keep silent and wait for one.
+      audio.volume = 0.55;
+      audio.play().catch(() => {});
+      setToggle('on');
+
+      const events = ['pointerdown','pointermove','mousemove','click','keydown','touchstart','wheel','scroll'];
+      const onFirstInput = () => {
+        events.forEach(ev => document.removeEventListener(ev, onFirstInput, true));
+        if (!firstUnmuteDone) unmuteMusic();
+      };
+      events.forEach(ev => document.addEventListener(ev, onFirstInput, { capture: true, passive: true }));
+    } else {
+      // The cover click already unmuted us; fade up from 0.
+      firstUnmuteDone = true;
+      audio.play().catch(() => {});
+      fadeMusic(0.55, 1200);
+      setToggle('on');
+    }
+
+    if (audioToggle) {
+      audioToggle.addEventListener('click', () => {
+        if (audio.muted) unmuteMusic();
+        else muteMusic();
       });
     }
   }
@@ -160,36 +201,24 @@
     }
   }
 
-  // Backspace one element. Walks DOM in reverse so italic <em> nodes are honored.
-  async function untype(el, speed = TYPE_OUT) {
-    el.classList.add('is-typing');
-    try {
-      if (REDUCED) { el.textContent = ''; return; }
-      while (el.textContent.length > 0) {
-        let cur = el;
-        while (cur.lastChild) cur = cur.lastChild;
-        if (cur.nodeType === Node.TEXT_NODE) {
-          cur.data = cur.data.slice(0, -1);
-          if (cur.data.length === 0) {
-            const parent = cur.parentNode;
-            parent.removeChild(cur);
-            if (parent !== el && parent.childNodes.length === 0) {
-              parent.parentNode.removeChild(parent);
-            }
-          }
-        } else {
-          cur.parentNode.removeChild(cur);
-          continue;
-        }
-        await sleep(speed);
-      }
-    } finally {
-      el.classList.remove('is-typing');
+  // Fade an element out, then clear its content. Replaces the old
+  // character-by-character backspace.
+  async function untype(el, durMs = 1400) {
+    if (!el) return;
+    el.classList.remove('is-typing');
+    el.classList.add('is-out');
+    if (REDUCED) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+      el.classList.remove('is-out');
+      return;
     }
+    await sleep(durMs);
+    while (el.firstChild) el.removeChild(el.firstChild);
+    el.classList.remove('is-out');
   }
 
-  async function untypeAll(els, speed = TYPE_OUT) {
-    return Promise.all(els.map(el => untype(el, speed)));
+  async function untypeAll(els, durMs = 1400) {
+    return Promise.all(els.map(el => untype(el, durMs)));
   }
 
   // ---------------------------------------------------------------------
@@ -230,15 +259,25 @@
   async function scene1() {
     await activate('s1');
 
-    showPhoto(c('.photo'));
-    await sleep(800);
-    await type(c('[data-line="meet"]'), 'Meet us in Mexico City.');
+    const lead = c('.line-lead');
+    const fade = c('.city-fade');
 
-    await sleep(5500);
+    await type(lead, 'Meet us in');
 
+    await sleep(1000);
+    requestAnimationFrame(() => {
+      fade.classList.add('is-in');
+      showPhoto(c('.photo'));
+    });
+
+    await sleep(2000);
+    captureSceneSnapshot(0);
+    await sleep(3500);
+
+    fade.classList.remove('is-in');
+    fade.classList.add('is-out');
     hidePhoto(c('.photo'));
-    await sleep(900);
-    await untype(c('[data-line="meet"]'));
+    await untype(lead);
     await sleep(400);
   }
 
@@ -262,13 +301,13 @@
 
     // Wait for the amor fade to complete (2s).
     await sleep(2000);
-    await sleep(5500);
+    captureSceneSnapshot(1);
+    await sleep(2500);
 
-    // Exit: fade text and photo out together, then backspace the lead-in.
+    // Exit: fade lead-in, amor and photo simultaneously.
     fade.classList.remove('is-in');
+    fade.classList.add('is-out');
     hidePhoto(c('.photo'));
-    await sleep(2000);
-
     await untype(lead);
     await sleep(900);
   }
@@ -281,24 +320,26 @@
     const dSat  = c('[data-line="d-sat"]');
     const dSun  = c('[data-line="d-sun"]');
 
-    await type(dDate, 'February 19 to 21, 2027.');
-    await sleep(400);
     showPhoto(c('.photo'));
-    await sleep(700);
+    await sleep(900);
+
+    await type(dDate, 'February 19 to 21, 2027.');
+    await sleep(1100);
 
     await type(dFri, 'Friday. Welcome dinner.');
-    await sleep(900);
+    await sleep(500);
 
     await type(dSat, 'Saturday. Haldi + Saatak.');
-    await sleep(900);
+    await sleep(500);
 
     await type(dSun, 'Sunday. Wedding + Reception.');
 
+    captureSceneSnapshot(2);
+
     await sleep(5500);
 
-    await untypeAll([dSun, dSat, dFri, dDate], 16);
-    await sleep(300);
     hidePhoto(c('.photo'));
+    await untypeAll([dSun, dSat, dFri, dDate]);
     await sleep(800);
   }
 
@@ -309,44 +350,43 @@
     const l1 = c('[data-line="why-1"]');
     const l2 = c('[data-line="why-2"]');
     const l3 = c('[data-line="why-3"]');
-    const l4 = c('[data-line="why-4"]');
     const l5 = c('[data-line="why-5"]');
 
-    const FAST = REDUCED ? 0 : 28;
+    const SLOW = REDUCED ? 0 : 60;
 
-    await type(lQ, 'We chose Mexico City for…', FAST);
     showPhoto(c('.photo'));
-    await sleep(1000);
+    await sleep(900);
 
-    await type(l1, 'the vibrant energy,', FAST);
-    await type(l2, 'the food (yes, even Indian food),', FAST);
-    await type(l3, 'and the cinematic beauty.', FAST);
-    await sleep(1000);
+    await type(lQ, 'We chose Mexico City for…', SLOW);
+    await sleep(700);
 
-    await type(l4, 'A magical place to celebrate with everyone we love.', FAST);
-    await sleep(1000);
+    await type(l1, 'the vibrant energy,', SLOW);
+    await type(l2, 'the food (yes, even Indian food),', SLOW);
+    await type(l3, 'and the cinematic beauty.', SLOW);
+    await sleep(900);
 
     await typeRich(l5, [
       { text: 'Also… ' },
       { text: 'por qué no,', italic: true }
-    ], FAST);
+    ], SLOW);
     await sleep(600);
     await typeRich(l5, [
       { text: ' amigo?', italic: true }
-    ], FAST);
+    ], SLOW);
+
+    captureSceneSnapshot(3);
 
     await sleep(7000);
 
-    await untypeAll([l5, l4, l3, l2, l1, lQ], 10);
-    await sleep(300);
     hidePhoto(c('.photo'));
+    await untypeAll([l5, l3, l2, l1, lQ]);
     await sleep(900);
   }
 
   async function scene6() {
     await activate('s6');
 
-    await type(c('[data-line="form-q"]'), 'Want our plans and CDMX recs?');
+    await type(c('[data-line="form-q"]'), 'Please give us your contact info for formal invitations.');
     await sleep(500);
     showPhoto(c('.photo'));
     await sleep(800);
@@ -356,27 +396,44 @@
       f.classList.add('is-in');
       await sleep(500);
     }
-    c('.actions').classList.add('is-in');
+
+    // Submit is gated by the .is-locked class — only reveal when both
+    // required fields have content.
+    const form    = c('#rsvp');
+    const actions = c('.actions');
+    const nameEl  = form.elements.name;
+    const emailEl = form.elements.email;
+
+    const refreshSubmit = () => {
+      const ok = nameEl.value.trim() && emailEl.value.trim();
+      if (ok) {
+        actions.classList.remove('is-locked');
+        actions.classList.add('is-in');
+      } else {
+        actions.classList.remove('is-in');
+        actions.classList.add('is-locked');
+      }
+    };
+    nameEl.addEventListener('input', refreshSubmit);
+    emailEl.addEventListener('input', refreshSubmit);
+    refreshSubmit();
 
     // Wait for submission OR navigation abort
-    const form = c('#rsvp');
     const intent = await new Promise((resolve, reject) => {
       const signal = abortCtl ? abortCtl.signal : null;
 
       const onSubmit = (e) => {
         e.preventDefault();
-        const action = (e.submitter && e.submitter.dataset.action) || 'yes';
-        if (action === 'yes') {
-          const name  = form.elements.name.value.trim();
-          const email = form.elements.email.value.trim();
-          if (!name || !email) { form.elements.name.focus(); return; }
-        }
+        const name  = form.elements.name.value.trim();
+        const email = form.elements.email.value.trim();
+        if (!name) { nameEl.focus(); return; }
+        if (!email) { emailEl.focus(); return; }
         const data = {
-          intent: action,
-          name:    form.elements.name.value.trim(),
-          email:   form.elements.email.value.trim(),
-          phone:   form.elements.phone.value.trim(),
-          address: form.elements.address.value.trim()
+          name,
+          email,
+          phone:      form.elements.phone.value.trim(),
+          address:    form.elements.address.value.trim(),
+          optInRecs:  form.elements.recs.checked
         };
         window.__rsvp = data;
         cleanup();
@@ -388,6 +445,8 @@
 
       function cleanup() {
         form.removeEventListener('submit', onSubmit);
+        nameEl.removeEventListener('input', refreshSubmit);
+        emailEl.removeEventListener('input', refreshSubmit);
         if (signal) signal.removeEventListener('abort', onAbort);
       }
 
@@ -395,13 +454,14 @@
       if (signal) signal.addEventListener('abort', onAbort, { once: true });
     });
 
-    // Fade form away
+    captureSceneSnapshot(4);
+
+    // Fade form away — photo, fields, actions, and form-q all together.
     await sleep(800);
     c('.actions').classList.remove('is-in');
     cAll('.field').forEach(f => f.classList.remove('is-in'));
-    await sleep(700);
-    await untype(c('[data-line="form-q"]'));
     hidePhoto(c('.photo'));
+    await untype(c('[data-line="form-q"]'));
     await sleep(800);
 
     return intent;
@@ -409,23 +469,28 @@
 
   async function scene7() {
     await activate('s7');
-    showPhoto(c('.photo'));
 
-    const t1 = c('[data-line="t-1"]');
-    const t2 = c('[data-line="t-2"]');
-    const t3 = c('[data-line="t-3"]');
-    const t4 = c('[data-line="t-4"]');
-    const t5 = c('[data-line="t-5"]');
+    const t2a = c('[data-line="t-2a"]');
+    const t2b = c('[data-line="t-2b"]');
+    const t3  = c('[data-line="t-3"]');
+    const t4  = c('[data-line="t-4"]');
+    const t6  = c('[data-line="t-6"]');
+    const t5  = c('[data-line="t-5"]');
 
-    await type(t1, "Thank you. We'll keep you in the loop.");
-    await sleep(700);
-    await type(t2, 'February 19 to 21, 2027. Plan to fly in Thursday or Friday morning.');
-    await sleep(700);
-    await type(t3, 'Hotel block and transportation will be arranged.');
-    await sleep(700);
+    await type(t2a, 'February 19 to 21, 2027.');
+    await sleep(300);
+    await type(t2b, 'Plan to fly in Thursday or Friday morning.');
+    await sleep(800);
+    await type(t3, 'Hotel block and transportation will be arranged.');
+    await sleep(800);
     await type(t4, 'Formal invitation arrives in late summer.');
     await sleep(900);
-    await type(t5, 'K + A.');
+    await type(t6, 'We hope to see you in Mexico City.');
+    await sleep(900);
+    showPhoto(c('.photo'));
+    await type(t5, 'Kajal + Adarsh');
+
+    captureSceneSnapshot(5);
 
     // Typing is done — let the moment land, then fade the music out.
     // Volume goes to 0 but playback continues so back-navigation can
@@ -433,17 +498,28 @@
     await sleep(1200);
     fadeMusic(0, 5000);
 
-    // Hold the scene indefinitely. The sleep is aborted if the user
-    // navigates back to a previous scene; otherwise the final frame stays
-    // on screen.
+    // Hold; user can advance to the logo finale via the next arrow.
+    await sleep(86400000);
+  }
+
+  async function scene8() {
+    await activate('s8');
+    const logo = c('.logo-mark');
+    if (logo) logo.classList.add('is-in');
+    await sleep(1400);
+    captureSceneSnapshot(6);
+
+    // If music is still up (user skipped scene 7 quickly), fade it out here.
+    if (audio && audio.volume > 0.05) fadeMusic(0, 3000);
+
     await sleep(86400000);
   }
 
   // ---------------------------------------------------------------------
   // Navigation: prev / next
   // ---------------------------------------------------------------------
-  const scenes = [scene1, scene2, scene3, scene4, scene6, scene7];
-  const sceneIds = ['s1','s2','s3','s4','s6','s7'];
+  const scenes = [scene1, scene2, scene3, scene4, scene6, scene7, scene8];
+  const sceneIds = ['s1','s2','s3','s4','s6','s7','s8'];
   let currentIndex = 0;
 
   // Snapshot every `.line` element's initial innerHTML at boot so the
@@ -457,12 +533,98 @@
     if (!scene) return;
     $$('.line', scene).forEach(el => {
       el.innerHTML = lineSnapshot.get(el) || '';
-      el.classList.remove('is-typing');
+      el.classList.remove('is-typing', 'is-out');
     });
-    $$('.line-lead, .amor-fade', scene).forEach(el => el.classList.remove('is-typing', 'is-in'));
+    $$('.line-lead, .amor-fade, .city-fade', scene).forEach(el => el.classList.remove('is-typing', 'is-in', 'is-out'));
     $$('.photo', scene).forEach(el => el.classList.remove('is-in'));
     $$('.field, .actions', scene).forEach(el => el.classList.remove('is-in'));
+    $$('.actions--single', scene).forEach(el => el.classList.add('is-locked'));
     $$('input, button[type="submit"]', scene).forEach(el => el.removeAttribute('disabled'));
+    $$('input[type="text"], input[type="email"], input[type="tel"]', scene).forEach(el => { el.value = ''; });
+    $$('input[type="checkbox"]', scene).forEach(el => { el.checked = false; });
+    $$('.logo-mark', scene).forEach(el => el.classList.remove('is-in'));
+  }
+
+  // Per-play snapshots: capture each scene's DOM at peak visibility so a
+  // back-nav restores final state instead of replaying typewriter + fades.
+  const snapshots = new Map();
+
+  function captureSceneSnapshot(idx) {
+    const scene = $('#' + sceneIds[idx]);
+    if (!scene) return;
+    const snap = { lines: [], lead: null, photoIn: false, decoIn: [], fieldsIn: false, actionsIn: false, formValues: null };
+
+    $$('.line', scene).forEach(el => {
+      if (el.dataset.line) snap.lines.push([el.dataset.line, el.innerHTML]);
+    });
+    const lead = $('.line-lead', scene);
+    if (lead) snap.lead = lead.innerHTML;
+
+    const photo = $('.photo', scene);
+    if (photo) snap.photoIn = photo.classList.contains('is-in');
+
+    $$('.city-fade, .amor-fade', scene).forEach(el => {
+      const cls = el.classList.contains('city-fade') ? 'city-fade' : 'amor-fade';
+      snap.decoIn.push([cls, el.classList.contains('is-in')]);
+    });
+
+    const fields = $$('.field', scene);
+    if (fields.length) snap.fieldsIn = fields.every(f => f.classList.contains('is-in'));
+    const actions = $('.actions', scene);
+    if (actions) snap.actionsIn = actions.classList.contains('is-in');
+    if (window.__rsvp) snap.formValues = { ...window.__rsvp };
+
+    snapshots.set(idx, snap);
+  }
+
+  function restoreSceneSnapshot(idx) {
+    const snap = snapshots.get(idx);
+    if (!snap) return false;
+    const scene = $('#' + sceneIds[idx]);
+    if (!scene) return false;
+
+    scene.classList.add('is-restoring');
+
+    snap.lines.forEach(([dataLine, html]) => {
+      const el = $(`[data-line="${dataLine}"]`, scene);
+      if (el) { el.innerHTML = html; el.classList.remove('is-typing', 'is-out'); }
+    });
+    if (snap.lead !== null) {
+      const lead = $('.line-lead', scene);
+      if (lead) { lead.innerHTML = snap.lead; lead.classList.remove('is-typing', 'is-out'); }
+    }
+
+    const photo = $('.photo', scene);
+    if (photo) { photo.classList.toggle('is-in', snap.photoIn); photo.classList.remove('is-out'); }
+
+    snap.decoIn.forEach(([cls, isIn]) => {
+      const el = $('.' + cls, scene);
+      if (el) { el.classList.toggle('is-in', isIn); el.classList.remove('is-out', 'is-typing'); }
+    });
+
+    if (snap.fieldsIn) $$('.field', scene).forEach(f => f.classList.add('is-in'));
+    const actions = $('.actions', scene);
+    if (actions) { actions.classList.toggle('is-in', snap.actionsIn); actions.classList.remove('is-locked'); }
+    if (snap.formValues) {
+      const form = $('#rsvp', scene);
+      if (form) {
+        form.elements.name.value    = snap.formValues.name    || '';
+        form.elements.email.value   = snap.formValues.email   || '';
+        form.elements.phone.value   = snap.formValues.phone   || '';
+        form.elements.address.value = snap.formValues.address || '';
+        form.elements.recs.checked  = !!snap.formValues.optInRecs;
+        $$('input, button', form).forEach(el => el.setAttribute('disabled', 'true'));
+      }
+    }
+
+    const logo = $('.logo-mark', scene);
+    if (logo) logo.classList.add('is-in');
+
+    // Force reflow so the property writes commit without transition, then
+    // drop the is-restoring class on the next frame.
+    void scene.offsetWidth;
+    requestAnimationFrame(() => scene.classList.remove('is-restoring'));
+    return true;
   }
 
   function updateNavButtons() {
@@ -492,9 +654,7 @@
   // Run
   // ---------------------------------------------------------------------
   async function run() {
-    if (audio) audio.volume = 0;
-    tryPlay();
-    fadeMusic(0.55, 6000);
+    startMusic();
 
     while (currentIndex < scenes.length) {
       abortCtl = new AbortController();
@@ -505,6 +665,21 @@
       // down (the final thank-you scene, now at index 5), restore volume.
       if (idx < scenes.length - 1 && audio && audio.volume < 0.4) {
         fadeMusic(0.55, 1500);
+      }
+
+      // Already played to completion — restore final state and hold for next nav.
+      if (snapshots.has(idx)) {
+        try {
+          await activate(sceneIds[idx]);
+          restoreSceneSnapshot(idx);
+          await sleep(86400000);
+        } catch (err) {
+          if (err !== ABORT) {
+            console.error('Slideshow error:', err);
+            return;
+          }
+        }
+        continue;
       }
 
       try {
@@ -550,10 +725,33 @@
     if (nextBtn) nextBtn.addEventListener('click', () => nav(+1));
   }
 
+  function bindCover() {
+    const cover = $('#cover');
+    const playBtn = $('#cover-play');
+    if (!cover || !playBtn) { run(); return; }
+    document.body.classList.add('is-cover');
+    playBtn.addEventListener('click', () => {
+      if (audio) {
+        audio.muted = false;
+        audio.volume = 0;
+        audio.play().catch(() => {});
+      }
+      cover.classList.add('is-out');
+      const cleanup = () => {
+        cover.removeEventListener('transitionend', cleanup);
+        if (cover.parentNode) cover.parentNode.removeChild(cover);
+        document.body.classList.remove('is-cover');
+      };
+      cover.addEventListener('transitionend', cleanup);
+      setTimeout(cleanup, 1000);
+      run();
+    }, { once: true });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { bindControls(); run(); });
+    document.addEventListener('DOMContentLoaded', () => { bindControls(); bindCover(); });
   } else {
     bindControls();
-    run();
+    bindCover();
   }
 })();
