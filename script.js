@@ -735,7 +735,8 @@
 
   function bindCover() {
     const cover = $('#cover');
-    const playBtn = $('#cover-play');
+    const playBtn   = $('#cover-play');
+    const playGroup = $('#cover-play-group');
     if (!cover || !playBtn) { run(); return; }
     document.body.classList.add('is-cover');
 
@@ -747,7 +748,7 @@
         e.preventDefault();
         if (pwInput.value.trim().toLowerCase() === 'cdmx') {
           pwForm.classList.add('is-out');
-          playBtn.classList.remove('is-hidden');
+          if (playGroup) playGroup.classList.remove('is-hidden');
           playBtn.focus();
         } else {
           pwInput.value = '';

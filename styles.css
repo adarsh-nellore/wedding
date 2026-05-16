@@ -754,8 +754,8 @@ body.is-cover .controls {
 .cover__logo,
 .logo-mark {
   background-color: #ffffff;
-  -webkit-mask: url('assets/ka-logo.png') no-repeat center / contain;
-          mask: url('assets/ka-logo.png') no-repeat center / contain;
+  -webkit-mask: url('assets/ka-logo.png?v=2') no-repeat center / contain;
+          mask: url('assets/ka-logo.png?v=2') no-repeat center / contain;
   -webkit-mask-mode: luminance;
           mask-mode: luminance;
 }
@@ -836,5 +836,25 @@ body.is-cover .controls {
   text-align: center;
 }
 
-.cover__play.is-hidden { display: none; }
+.cover__play-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.cover__play-group.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cover__play-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0.45;
+  margin: 0;
+}
 
