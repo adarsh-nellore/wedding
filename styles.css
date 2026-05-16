@@ -667,6 +667,7 @@ em { font-style: italic; font-weight: 400; }
   .scene {
     padding: clamp(16px, 5vw, 28px);
     padding-top: max(env(safe-area-inset-top, 16px), 20px);
+    padding-bottom: 120px;
   }
 
   .rsvp { gap: 1em; max-width: 100%; }
