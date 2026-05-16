@@ -13,7 +13,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap"
     />
     <link rel="stylesheet" href="tokens.css?v=7" />
-    <link rel="stylesheet" href="styles.css?v=10" />
+    <link rel="stylesheet" href="styles.css?v=12" />
   </head>
   <body>
     <audio id="music" src="assets/cerca-de-ti.mp3" preload="auto" autoplay muted loop playsinline></audio>
@@ -21,12 +21,22 @@
     <div class="cover" id="cover" role="dialog" aria-label="Begin">
       <div class="cover__inner">
         <div class="cover__logo" role="img" aria-label="K & A"></div>
-        <button class="cover__play" id="cover-play" type="button" aria-label="Begin">
+        <form class="cover__password" id="cover-password" novalidate>
+          <input
+            type="password"
+            id="cover-pw-input"
+            class="cover__pw-input"
+            placeholder="password"
+            autocomplete="off"
+            aria-label="Enter password"
+          />
+          <p class="cover__pw-error" id="cover-pw-error" aria-live="polite"></p>
+        </form>
+        <button class="cover__play is-hidden" id="cover-play" type="button" aria-label="Begin">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M8 5 L20 12 L8 19 Z" fill="currentColor"/>
           </svg>
         </button>
-        <p class="cover__hint">Press play</p>
       </div>
     </div>
 
@@ -219,6 +229,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=16"></script>
+    <script src="script.js?v=17"></script>
   </body>
 </html>

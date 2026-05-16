@@ -79,6 +79,11 @@
   // or via the top-right toggle. Toggle reflects on/off state.
   // ---------------------------------------------------------------------
   const audio = $('#music');
+  if (audio) {
+    audio.addEventListener('error', () =>
+      console.warn('[K+A] Audio failed to load. Place cerca-de-ti.mp3 in assets/.')
+    , { once: true });
+  }
   const audioToggle = $('#audio-toggle');
   let firstUnmuteDone = false;
 
@@ -361,7 +366,9 @@
     await sleep(700);
 
     await type(l1, 'the vibrant energy,', SLOW);
+    await sleep(700);
     await type(l2, 'the food (yes, even Indian food),', SLOW);
+    await sleep(700);
     await type(l3, 'and the cinematic beauty.', SLOW);
     await sleep(900);
 
@@ -470,6 +477,8 @@
   async function scene7() {
     await activate('s7');
 
+    showPhoto(c('.photo'));
+
     const t2a = c('[data-line="t-2a"]');
     const t2b = c('[data-line="t-2b"]');
     const t3  = c('[data-line="t-3"]');
@@ -487,7 +496,6 @@
     await sleep(900);
     await type(t6, 'We hope to see you in Mexico City.');
     await sleep(900);
-    showPhoto(c('.photo'));
     await type(t5, 'Kajal + Adarsh');
 
     captureSceneSnapshot(5);
@@ -730,6 +738,25 @@
     const playBtn = $('#cover-play');
     if (!cover || !playBtn) { run(); return; }
     document.body.classList.add('is-cover');
+
+    const pwForm  = $('#cover-password');
+    const pwInput = $('#cover-pw-input');
+    const pwError = $('#cover-pw-error');
+    if (pwForm && pwInput) {
+      pwForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (pwInput.value.trim().toLowerCase() === 'cdmx') {
+          pwForm.classList.add('is-out');
+          playBtn.classList.remove('is-hidden');
+          playBtn.focus();
+        } else {
+          pwInput.value = '';
+          if (pwError) pwError.textContent = 'Incorrect password.';
+          pwInput.focus();
+        }
+      });
+    }
+
     playBtn.addEventListener('click', () => {
       if (audio) {
         audio.muted = false;

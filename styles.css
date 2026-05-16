@@ -469,12 +469,44 @@ em { font-style: italic; font-weight: 400; }
   margin-top: 0.6em;
 }
 
-.field--check input {
-  width: 22px;
-  height: 22px;
-  flex: 0 0 22px;
-  margin: 0.15em 0 0;
-  accent-color: var(--fg);
+.field--check input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 0.25em 0 0;
+  border: 1px solid var(--fg);
+  border-radius: 2px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  opacity: 0.4;
+  transition: opacity 220ms var(--ease), background-color 220ms var(--ease);
+}
+
+.field--check input[type="checkbox"]:checked {
+  background-color: var(--fg);
+  opacity: 1;
+}
+
+.field--check input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: 1.5px solid var(--bg);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.field--check input[type="checkbox"]:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 3px;
+  opacity: 0.7;
 }
 
 .field--check span {
@@ -551,14 +583,27 @@ em { font-style: italic; font-weight: 400; }
   .scene-grid--right-photo,
   .scene-grid--left-photo {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 32px;
+    grid-template-rows: auto auto;
+    gap: 24px;
+  }
+
+  /* Photo always at top on mobile for cinematic feel */
+  .scene-grid--right-photo .photo,
+  .scene-grid--left-photo .photo {
+    order: -1;
   }
 
   .photo--portrait {
-    max-height: 42vh;
-    aspect-ratio: 4 / 5;
+    max-height: 44vh;
+    aspect-ratio: 4 / 3;
     justify-self: center;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .photo--portrait img {
+    object-fit: cover;
+    object-position: center top;
   }
 
   .scene-grid--left-photo .copy--left-mid {
@@ -567,7 +612,7 @@ em { font-style: italic; font-weight: 400; }
 
   .copy--left-mid,
   .copy--left-top {
-    align-self: center;
+    align-self: flex-start;
     justify-self: center;
     text-align: left;
     width: 100%;
@@ -586,10 +631,26 @@ em { font-style: italic; font-weight: 400; }
 }
 
 @media (max-width: 480px) {
-  .photo--portrait { max-height: 38vh; aspect-ratio: 4 / 5; }
-  .scene { padding: clamp(16px, 5vw, 28px); }
-  .rsvp { gap: 1em; }
+  .photo--portrait {
+    max-height: 36vh;
+    aspect-ratio: 16 / 10;
+  }
+
+  .scene {
+    padding: clamp(16px, 5vw, 28px);
+    padding-top: max(env(safe-area-inset-top, 16px), 20px);
+  }
+
+  .rsvp { gap: 1em; max-width: 100%; }
+
+  /* Hide photo on the form scene at small sizes — gives the form room */
+  .scene--form .photo { display: none; }
+
   .field--check span { font-size: 0.85em; }
+
+  /* Larger tap targets for nav controls */
+  .ctrl { width: 44px; height: 44px; }
+  .controls { gap: 20px; }
 }
 
 /* Instant restore: disable all transitions/animations on a scene whose
@@ -692,7 +753,7 @@ body.is-cover .controls {
 
 .cover__logo,
 .logo-mark {
-  background-color: var(--fg);
+  background-color: #ffffff;
   -webkit-mask: url('assets/ka-logo.png') no-repeat center / contain;
           mask: url('assets/ka-logo.png') no-repeat center / contain;
   -webkit-mask-mode: luminance;
@@ -716,7 +777,64 @@ body.is-cover .controls {
   aspect-ratio: 1 / 1;
   opacity: 0;
   transition: opacity 1400ms var(--ease);
+  background-color: #ffffff;
 }
 
 .logo-mark.is-in { opacity: 1; }
+
+/* -----------------------------------------------------------------------
+   Password gate
+----------------------------------------------------------------------- */
+
+.cover__password {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 400ms var(--ease);
+}
+
+.cover__password.is-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cover__pw-input {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--fg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.85em;
+  letter-spacing: 0.1em;
+  text-align: center;
+  width: clamp(140px, 30vw, 200px);
+  padding: 0.1em 0 0.2em;
+  outline: none;
+  opacity: 0.65;
+  transition: opacity 200ms ease, border-bottom-width 200ms ease, padding-bottom 200ms ease;
+}
+
+.cover__pw-input::placeholder {
+  opacity: 0.45;
+  letter-spacing: 0.1em;
+}
+
+.cover__pw-input:focus {
+  opacity: 1;
+  border-bottom-width: 2px;
+  padding-bottom: calc(0.2em - 1px);
+}
+
+.cover__pw-error {
+  font-size: 0.6em;
+  letter-spacing: 0.06em;
+  font-style: italic;
+  color: var(--fg);
+  opacity: 0.5;
+  min-height: 1.4em;
+  text-align: center;
+}
+
+.cover__play.is-hidden { display: none; }
 
