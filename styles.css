@@ -815,6 +815,15 @@ body.is-cover .controls {
    Password gate
 ----------------------------------------------------------------------- */
 
+.cover__slot {
+  display: grid;
+  place-items: center;
+}
+
+.cover__slot > * {
+  grid-area: 1 / 1;
+}
+
 .cover__password {
   display: flex;
   flex-direction: column;

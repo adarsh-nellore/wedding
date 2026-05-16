@@ -21,25 +21,27 @@
     <div class="cover" id="cover" role="dialog" aria-label="Begin">
       <div class="cover__inner">
         <div class="cover__logo" role="img" aria-label="K & A"></div>
-        <form class="cover__password" id="cover-password" novalidate>
-          <input
-            type="password"
-            id="cover-pw-input"
-            class="cover__pw-input"
-            placeholder="password"
-            autocomplete="off"
-            aria-label="Enter password"
-          />
-          <p class="cover__pw-error" id="cover-pw-error" aria-live="polite"></p>
-          <button type="submit" class="cover__pw-submit" aria-label="Submit password">→</button>
-        </form>
-        <div class="cover__play-group is-hidden" id="cover-play-group">
-          <button class="cover__play" id="cover-play" type="button" aria-label="Begin">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M8 5 L20 12 L8 19 Z" fill="currentColor"/>
-            </svg>
-          </button>
-          <p class="cover__play-label">Audio on</p>
+        <div class="cover__slot">
+          <form class="cover__password" id="cover-password" novalidate>
+            <input
+              type="password"
+              id="cover-pw-input"
+              class="cover__pw-input"
+              placeholder="password"
+              autocomplete="off"
+              aria-label="Enter password"
+            />
+            <p class="cover__pw-error" id="cover-pw-error" aria-live="polite"></p>
+            <button type="submit" class="cover__pw-submit" aria-label="Submit password">→</button>
+          </form>
+          <div class="cover__play-group is-hidden" id="cover-play-group">
+            <button class="cover__play" id="cover-play" type="button" aria-label="Begin">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5 L20 12 L8 19 Z" fill="currentColor"/>
+              </svg>
+            </button>
+            <p class="cover__play-label">Audio on</p>
+          </div>
         </div>
       </div>
     </div>
