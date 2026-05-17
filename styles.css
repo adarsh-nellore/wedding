@@ -762,7 +762,6 @@ body.is-cover .controls {
    so the white background is treated as transparent.
 ----------------------------------------------------------------------- */
 
-.cover__logo,
 .logo-mark {
   background-color: #ffffff;
   -webkit-mask: url('assets/ka-logo.png?v=2') no-repeat center / contain;
@@ -772,9 +771,10 @@ body.is-cover .controls {
 }
 
 .cover__logo {
-  width: clamp(140px, 22vmin, 240px);
+  width: clamp(220px, 55vmin, 420px);
   aspect-ratio: 1 / 1;
-  opacity: 0.9;
+  object-fit: cover;
+  display: block;
 }
 
 .scene--logo {
