@@ -771,9 +771,7 @@ body.is-cover .controls {
 }
 
 .cover__logo {
-  width: clamp(220px, 55vmin, 420px);
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+  width: min(360px, 80vw);
   display: block;
 }
 
