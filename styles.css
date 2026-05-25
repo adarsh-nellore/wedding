@@ -595,8 +595,26 @@ em { font-style: italic; font-weight: 400; }
   .scene-grid--left-photo {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-    gap: 24px;
+    gap: clamp(24px, 5vh, 40px);
   }
+
+  /* Larger tap targets across the whole touch range (480–900px included) */
+  .ctrl { width: 44px; height: 44px; }
+
+  /* Full-bleed amor photo: 100% (not 100vw) to avoid horizontal overflow */
+  .photo--full { width: 100%; }
+
+  /* Form scales with the body on mobile (drop the desktop 0.78em shrink) */
+  .rsvp { font-size: 1em; }
+
+  /* iOS auto-zoom guard: focusable inputs must render at >=16px */
+  .field input,
+  .cover__pw-input { font-size: 16px; }
+
+  .cover__pw-error { font-size: 0.72em; }
+
+  /* Keep the thank-you signature clear of the fixed control bar */
+  #s7 .copy--left-mid { padding-top: clamp(24px, 6vh, 48px); }
 
   /* Photo always at top on mobile for cinematic feel */
   .scene-grid--right-photo .photo,
@@ -650,7 +668,7 @@ em { font-style: italic; font-weight: 400; }
   .scene {
     padding: clamp(16px, 5vw, 28px);
     padding-top: max(env(safe-area-inset-top, 16px), 20px);
-    padding-bottom: 120px;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
   .rsvp { gap: 1em; max-width: 100%; }
@@ -659,10 +677,6 @@ em { font-style: italic; font-weight: 400; }
   .scene--form .photo { display: none; }
 
   .field--check span { font-size: 0.85em; }
-
-  /* Larger tap targets for nav controls */
-  .ctrl { width: 44px; height: 44px; }
-  .controls { gap: 20px; }
 }
 
 /* Instant restore: disable all transitions/animations on a scene whose
